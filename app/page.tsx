@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Zap, BookOpen, Upload, Link as LinkIcon, Play, Pause } from 'lucide-react';
+import { Clock, BookOpen, Upload, Link as LinkIcon, Play, Pause, Timer } from 'lucide-react';
 import Header from '@/components/Header';
 
 const DEMO_TEXT = "Speed reading is a technique that allows you to read faster while maintaining good comprehension. The RSVP method presents words one at a time at your chosen speed, eliminating eye movement and reducing subvocalization. With practice, you can dramatically increase your reading speed.";
@@ -58,17 +58,16 @@ export default function Home() {
       <section className="pt-20 pb-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 text-primary-500 rounded-full text-sm font-medium mb-6">
-            <Zap size={16} />
-            Speed Reading Technology
+            <Clock size={16} />
+            Save Hours Every Week
           </div>
 
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Read <span className="text-primary-500">Faster</span>, Comprehend{' '}
-            <span className="text-primary-500">More</span>
+            Your Time is <span className="text-primary-500">Valuable</span>
           </h1>
 
           <p className="text-lg md:text-xl text-[var(--muted)] mb-8 max-w-2xl mx-auto">
-            Train your reading speed with RSVP technology. Upload books, articles, and documents to read at speeds up to 1000+ WPM.
+            Cut through information overload. Read articles in minutes, not hours, with our free RSVP speed reader.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -77,7 +76,7 @@ export default function Home() {
               className="flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors"
             >
               <BookOpen size={20} />
-              Start Reading Free
+              Start Reading
             </Link>
             <button
               onClick={toggleDemo}
@@ -94,16 +93,16 @@ export default function Home() {
       <section className="py-8 border-y border-[var(--border)]">
         <div className="max-w-4xl mx-auto px-4 flex justify-center gap-12 md:gap-24">
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-primary-500">3x</div>
-            <div className="text-sm text-[var(--muted)]">Faster Reading</div>
+            <div className="text-3xl md:text-4xl font-bold text-primary-500">Save Hours</div>
+            <div className="text-sm text-[var(--muted)]">Every Week</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-primary-500">500+</div>
-            <div className="text-sm text-[var(--muted)]">Words per Minute</div>
+            <div className="text-3xl md:text-4xl font-bold text-primary-500">Read More</div>
+            <div className="text-sm text-[var(--muted)]">In Less Time</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-primary-500">100%</div>
-            <div className="text-sm text-[var(--muted)]">Free to Use</div>
+            <div className="text-3xl md:text-4xl font-bold text-primary-500">Stay Focused</div>
+            <div className="text-sm text-[var(--muted)]">No Distractions</div>
           </div>
         </div>
       </section>
@@ -112,8 +111,8 @@ export default function Home() {
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">See it in Action</h2>
-            <p className="text-[var(--muted)]">Press play to experience RSVP speed reading right here</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">See How It Works</h2>
+            <p className="text-[var(--muted)]">One word at a time. Maximum focus. Zero distractions.</p>
           </div>
 
           {/* Demo Reader */}
@@ -132,7 +131,7 @@ export default function Home() {
                   {currentWord.slice(orpIndex + 1)}
                 </span>
               ) : (
-                <span className="text-[var(--muted)]">Speed</span>
+                <span className="text-[var(--muted)]">Ready</span>
               )}
             </div>
 
@@ -158,7 +157,7 @@ export default function Home() {
       <section className="py-16 px-4 bg-[var(--card)]">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-            Everything You Need
+            Simple, Powerful, Free
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -166,19 +165,19 @@ export default function Home() {
               <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Upload size={24} className="text-primary-500" />
               </div>
-              <h3 className="font-semibold mb-2">Multiple Formats</h3>
+              <h3 className="font-semibold mb-2">Any Content</h3>
               <p className="text-sm text-[var(--muted)]">
-                Upload PDF, EPUB, or TXT files. Paste text or import from any URL.
+                Paste text, import from URLs, or upload PDF, EPUB and TXT files.
               </p>
             </div>
 
             <div className="text-center">
               <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Zap size={24} className="text-primary-500" />
+                <Timer size={24} className="text-primary-500" />
               </div>
-              <h3 className="font-semibold mb-2">Adjustable Speed</h3>
+              <h3 className="font-semibold mb-2">Your Pace</h3>
               <p className="text-sm text-[var(--muted)]">
-                Start slow and work your way up. Customize from 100 to 1000+ WPM.
+                Adjust from 100 to 1000+ words per minute. Start slow, build up.
               </p>
             </div>
 
@@ -186,9 +185,9 @@ export default function Home() {
               <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <LinkIcon size={24} className="text-primary-500" />
               </div>
-              <h3 className="font-semibold mb-2">Import from Web</h3>
+              <h3 className="font-semibold mb-2">Works Anywhere</h3>
               <p className="text-sm text-[var(--muted)]">
-                Paste any article URL and we&apos;ll extract the text automatically.
+                No downloads. No sign-up. Just paste and read.
               </p>
             </div>
           </div>
@@ -199,16 +198,16 @@ export default function Home() {
       <section className="py-20 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            Ready to Read Faster?
+            Stop Wasting Time
           </h2>
           <p className="text-[var(--muted)] mb-8">
-            No signup required. Start speed reading in seconds.
+            The average person spends 2+ hours reading daily. Cut that in half.
           </p>
           <Link
             href="/reader"
             className="inline-flex items-center gap-2 px-8 py-4 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium text-lg transition-colors"
           >
-            <Zap size={24} />
+            <Clock size={24} />
             Start Reading Now
           </Link>
         </div>
@@ -217,7 +216,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-[var(--border)]">
         <div className="max-w-4xl mx-auto text-center text-sm text-[var(--muted)]">
-          <p>SpeedReader - Free RSVP Speed Reading App</p>
+          <p>Free RSVP Speed Reading Tool</p>
         </div>
       </footer>
     </div>

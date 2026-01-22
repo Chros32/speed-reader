@@ -2,10 +2,20 @@
 
 import { useMemo } from 'react';
 
+type FontSize = 'small' | 'medium' | 'large' | 'xl';
+
 interface RSVPDisplayProps {
   word: string;
   wpm: number;
+  fontSize: FontSize;
 }
+
+const FONT_SIZE_CLASSES: Record<FontSize, string> = {
+  small: 'text-2xl md:text-4xl lg:text-5xl',
+  medium: 'text-3xl md:text-5xl lg:text-6xl',
+  large: 'text-4xl md:text-6xl lg:text-7xl',
+  xl: 'text-5xl md:text-7xl lg:text-8xl',
+};
 
 // Calculate Optimal Recognition Point (ORP) - where the eye naturally focuses
 function getORPIndex(word: string): number {
@@ -17,7 +27,7 @@ function getORPIndex(word: string): number {
   return Math.floor(length / 4);
 }
 
-export default function RSVPDisplay({ word, wpm }: RSVPDisplayProps) {
+export default function RSVPDisplay({ word, wpm, fontSize }: RSVPDisplayProps) {
   const { before, focal, after } = useMemo(() => {
     if (!word) {
       return { before: '', focal: '', after: '' };
@@ -41,12 +51,12 @@ export default function RSVPDisplay({ word, wpm }: RSVPDisplayProps) {
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-1 h-3 bg-primary-500 rounded-full" />
 
         {/* Word display */}
-        <div className="flex items-center justify-center text-4xl md:text-6xl lg:text-7xl font-medium tracking-tight select-none">
+        <div className={`flex items-center justify-center ${FONT_SIZE_CLASSES[fontSize]} font-medium tracking-tight select-none`}>
           {word ? (
             <>
-              <span className="text-right min-w-[200px] md:min-w-[300px]">{before}</span>
+              <span className="text-right min-w-[150px] md:min-w-[250px]">{before}</span>
               <span className="text-primary-500 font-bold">{focal}</span>
-              <span className="text-left min-w-[200px] md:min-w-[300px]">{after}</span>
+              <span className="text-left min-w-[150px] md:min-w-[250px]">{after}</span>
             </>
           ) : (
             <span className="text-[var(--muted)]">Ready</span>

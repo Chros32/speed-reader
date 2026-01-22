@@ -1,19 +1,34 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Trash2, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import RSVPDisplay from '@/components/RSVPDisplay';
 import SpeedControl from '@/components/SpeedControl';
 import PlaybackControls from '@/components/PlaybackControls';
 import TextInput from '@/components/TextInput';
+import FontSizeControl from '@/components/FontSizeControl';
+import { getRecentDocuments, saveDocument, updateDocumentProgress, deleteDocument, RecentDocument } from '@/lib/storage';
+
+type FontSize = 'small' | 'medium' | 'large' | 'xl';
 
 function parseTextToWords(text: string): string[] {
   return text
     .split(/\s+/)
     .map((word) => word.trim())
     .filter((word) => word.length > 0);
+}
+
+function formatTimeAgo(timestamp: number): string {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  if (seconds < 60) return 'Just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
 }
 
 export default function ReaderPage() {
@@ -24,12 +39,20 @@ export default function ReaderPage() {
   const [wpm, setWpm] = useState(300);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [fontSize, setFontSize] = useState<FontSize>('large');
+  const [recentDocs, setRecentDocs] = useState<RecentDocument[]>([]);
+  const [currentDocId, setCurrentDocId] = useState<string | null>(null);
 
-  // Refs for intervals
+  // Refs
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Current word
   const currentWord = words[currentIndex] || '';
+
+  // Load recent documents on mount
+  useEffect(() => {
+    setRecentDocs(getRecentDocuments());
+  }, []);
 
   // Parse text into words when text changes
   useEffect(() => {
@@ -38,8 +61,21 @@ export default function ReaderPage() {
       setWords(parsedWords);
       setCurrentIndex(0);
       setIsPlaying(false);
+
+      // Save to recent documents
+      const doc = saveDocument(text);
+      setCurrentDocId(doc.id);
+      setRecentDocs(getRecentDocuments());
     }
   }, [text]);
+
+  // Update progress periodically
+  useEffect(() => {
+    if (currentDocId && words.length > 0) {
+      const progress = Math.round((currentIndex / words.length) * 100);
+      updateDocumentProgress(currentDocId, progress);
+    }
+  }, [currentIndex, currentDocId, words.length]);
 
   // Playback interval
   useEffect(() => {
@@ -67,7 +103,6 @@ export default function ReaderPage() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is typing in an input
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement
@@ -139,7 +174,14 @@ export default function ReaderPage() {
     setText(null);
     setWords([]);
     setCurrentIndex(0);
+    setCurrentDocId(null);
     setIsPlaying(false);
+    setRecentDocs(getRecentDocuments());
+  }, []);
+
+  const handleDeleteDoc = useCallback((id: string) => {
+    deleteDocument(id);
+    setRecentDocs(getRecentDocuments());
   }, []);
 
   // Render input view if no text loaded
@@ -157,6 +199,49 @@ export default function ReaderPage() {
           </div>
 
           <TextInput onTextSubmit={handleTextSubmit} isLoading={isLoading} />
+
+          {/* Recent Documents */}
+          {recentDocs.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Clock size={20} />
+                Recent Documents
+              </h2>
+              <div className="space-y-2">
+                {recentDocs.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="bg-[var(--card)] rounded-lg p-4 flex items-center justify-between group hover:bg-[var(--border)]/50 transition-colors"
+                  >
+                    <button
+                      onClick={() => {
+                        // Find the text from preview (simplified - in production you'd store full text)
+                        // For now, we'll just show a message
+                        alert('To re-read this document, please paste the text again. Full document storage coming in V2!');
+                      }}
+                      className="flex-1 text-left"
+                    >
+                      <div className="font-medium truncate">{doc.title}</div>
+                      <div className="text-sm text-[var(--muted)] flex items-center gap-3 mt-1">
+                        <span>{doc.wordCount} words</span>
+                        <span>•</span>
+                        <span>{doc.progress}% complete</span>
+                        <span>•</span>
+                        <span>{formatTimeAgo(doc.lastRead)}</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteDoc(doc.id)}
+                      className="p-2 text-[var(--muted)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                      title="Delete"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mt-8 text-center">
             <Link
@@ -187,8 +272,11 @@ export default function ReaderPage() {
             <ArrowLeft size={18} />
             New Text
           </button>
-          <div className="text-sm text-[var(--muted)]">
-            {words.length} words • ~{Math.ceil(words.length / wpm)} min at {wpm} wpm
+          <div className="flex items-center gap-4">
+            <FontSizeControl fontSize={fontSize} onFontSizeChange={setFontSize} />
+            <div className="text-sm text-[var(--muted)]">
+              {words.length} words • ~{Math.ceil(words.length / wpm)} min
+            </div>
           </div>
         </div>
       </div>
@@ -197,7 +285,7 @@ export default function ReaderPage() {
       <main className="flex-1 flex flex-col justify-center py-8 px-4">
         <div className="space-y-8">
           {/* RSVP Display */}
-          <RSVPDisplay word={currentWord} wpm={wpm} />
+          <RSVPDisplay word={currentWord} wpm={wpm} fontSize={fontSize} />
 
           {/* Playback Controls */}
           <PlaybackControls

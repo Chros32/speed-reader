@@ -1,33 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'nodejs';
-export const maxDuration = 30;
+export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
-    const contentType = request.headers.get('content-type') || '';
-
-    // Handle file upload (multipart form data)
-    if (contentType.includes('multipart/form-data')) {
-      const formData = await request.formData();
-      const file = formData.get('file') as File | null;
-
-      if (!file) {
-        return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-      }
-
-      const extension = file.name.split('.').pop()?.toLowerCase();
-
-      if (extension === 'pdf') {
-        const arrayBuffer = await file.arrayBuffer();
-        const text = await parsePdf(arrayBuffer);
-        return NextResponse.json({ text });
-      }
-
-      return NextResponse.json({ error: 'Unsupported file type' }, { status: 400 });
-    }
-
-    // Handle URL extraction (JSON body)
     const { url } = await request.json();
 
     if (!url || typeof url !== 'string') {
@@ -42,20 +18,42 @@ export async function POST(request: NextRequest) {
         throw new Error('Invalid protocol');
       }
     } catch {
-      return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+      return NextResponse.json({ error: 'Please enter a valid URL starting with https://' }, { status: 400 });
     }
 
-    // Fetch the page
+    // Fetch the page with a realistic browser User-Agent
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; SpeedReader/1.0)',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Cache-Control': 'no-cache',
       },
     });
 
     if (!response.ok) {
+      if (response.status === 403) {
+        return NextResponse.json(
+          { error: 'This website blocks automated access. Try copying and pasting the text instead.' },
+          { status: 400 }
+        );
+      }
+      if (response.status === 404) {
+        return NextResponse.json(
+          { error: 'Page not found. Please check the URL and try again.' },
+          { status: 400 }
+        );
+      }
       return NextResponse.json(
-        { error: `Failed to fetch URL: ${response.status}` },
+        { error: `Could not access this page (Error ${response.status})` },
+        { status: 400 }
+      );
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('text/html') && !contentType.includes('application/xhtml')) {
+      return NextResponse.json(
+        { error: 'This URL does not point to a readable web page.' },
         { status: 400 }
       );
     }
@@ -63,9 +61,9 @@ export async function POST(request: NextRequest) {
     const html = await response.text();
     const text = extractTextFromHtml(html);
 
-    if (!text || text.length < 50) {
+    if (!text || text.length < 100) {
       return NextResponse.json(
-        { error: 'Could not extract meaningful text from this page' },
+        { error: 'Could not extract enough readable text from this page. Try a different article or paste the text directly.' },
         { status: 400 }
       );
     }
@@ -73,38 +71,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ text });
   } catch (error) {
     console.error('Extract API error:', error);
+
+    if (error instanceof Error && error.message.includes('fetch')) {
+      return NextResponse.json(
+        { error: 'Could not connect to this website. Please check your internet connection and try again.' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: 'Something went wrong. Please try again or paste the text directly.' },
       { status: 500 }
     );
   }
 }
 
-async function parsePdf(arrayBuffer: ArrayBuffer): Promise<string> {
-  // Dynamic import for PDF.js
-  const pdfjsLib = await import('pdfjs-dist');
-
-  // Set worker source
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '';
-
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  const textParts: string[] = [];
-
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const textContent = await page.getTextContent();
-    const pageText = textContent.items
-      .map((item: any) => item.str)
-      .join(' ');
-    textParts.push(pageText);
-  }
-
-  return textParts.join('\n\n').trim();
-}
-
 function extractTextFromHtml(html: string): string {
-  // Simple HTML to text extraction without JSDOM for edge compatibility
-  // Remove script and style tags
+  // Remove unwanted elements
   let text = html
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
@@ -112,29 +95,45 @@ function extractTextFromHtml(html: string): string {
     .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
     .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
     .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
-    .replace(/<aside[^>]*>[\s\S]*?<\/aside>/gi, '');
+    .replace(/<aside[^>]*>[\s\S]*?<\/aside>/gi, '')
+    .replace(/<form[^>]*>[\s\S]*?<\/form>/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '');
 
-  // Try to find main content
-  const articleMatch = text.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
-  const mainMatch = text.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+  // Try to find main content in order of preference
+  const contentSelectors = [
+    /<article[^>]*>([\s\S]*?)<\/article>/i,
+    /<main[^>]*>([\s\S]*?)<\/main>/i,
+    /<div[^>]*class="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+    /<div[^>]*class="[^"]*post[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+    /<div[^>]*class="[^"]*article[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+    /<div[^>]*id="content"[^>]*>([\s\S]*?)<\/div>/i,
+    /<div[^>]*id="main"[^>]*>([\s\S]*?)<\/div>/i,
+  ];
 
-  if (articleMatch) {
-    text = articleMatch[1];
-  } else if (mainMatch) {
-    text = mainMatch[1];
+  for (const selector of contentSelectors) {
+    const match = text.match(selector);
+    if (match && match[1] && match[1].length > 500) {
+      text = match[1];
+      break;
+    }
   }
 
-  // Convert common block elements to line breaks
+  // Convert block elements to line breaks
   text = text
-    .replace(/<(p|div|br|h[1-6]|li)[^>]*>/gi, '\n')
-    .replace(/<\/?(p|div|h[1-6]|li|ul|ol)[^>]*>/gi, '\n')
-    .replace(/<[^>]+>/g, ' ') // Remove remaining tags
+    .replace(/<(p|div|br|h[1-6]|li|tr)[^>]*>/gi, '\n')
+    .replace(/<\/?(p|div|h[1-6]|li|ul|ol|tr|td|th|table|tbody)[^>]*>/gi, '\n')
+    .replace(/<[^>]+>/g, ' ')
+    // Decode HTML entities
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#(\d+);/g, (_, num) => String.fromCharCode(parseInt(num, 10)))
+    // Clean up whitespace
     .replace(/\s+/g, ' ')
     .replace(/\n\s+/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
