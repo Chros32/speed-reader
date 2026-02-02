@@ -43,11 +43,34 @@ export function useSubscription() {
   }, []);
 
   // Activate premium subscription
-  const activatePremium = useCallback((durationDays: number = 365) => {
+  const activatePremium = useCallback((durationDays: number = 365, customerId?: string) => {
     const expiresAt = Date.now() + durationDays * 24 * 60 * 60 * 1000;
-    setSubscription('premium', expiresAt);
+    setSubscription('premium', expiresAt, customerId);
     setTier('premium');
   }, []);
+
+  // Get customer ID for portal access
+  const customerId = getSubscription().customerId;
+
+  // Open customer portal
+  const openPortal = useCallback(async () => {
+    if (!customerId) return;
+
+    try {
+      const response = await fetch('/api/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId }),
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Portal error:', error);
+    }
+  }, [customerId]);
 
   // Get max WPM based on tier
   const maxWpm = isPremium ? 1000 : FREE_LIMITS.maxWpm;
@@ -71,5 +94,7 @@ export function useSubscription() {
     recordReading,
     checkCanRead,
     activatePremium,
+    customerId,
+    openPortal,
   };
 }

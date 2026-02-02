@@ -11,6 +11,7 @@ export interface UsageData {
 export interface SubscriptionState {
   tier: SubscriptionTier;
   expiresAt?: number; // timestamp for premium expiry
+  customerId?: string; // Stripe customer ID for portal access
 }
 
 const USAGE_KEY = 'readfast_usage';
@@ -105,10 +106,15 @@ export function getSubscription(): SubscriptionState {
 }
 
 // Set subscription (called after successful payment)
-export function setSubscription(tier: SubscriptionTier, expiresAt?: number): void {
+export function setSubscription(tier: SubscriptionTier, expiresAt?: number, customerId?: string): void {
   if (typeof window === 'undefined') return;
 
-  const sub: SubscriptionState = { tier, expiresAt };
+  const existing = getSubscription();
+  const sub: SubscriptionState = {
+    tier,
+    expiresAt,
+    customerId: customerId || existing.customerId // preserve existing customerId
+  };
   localStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify(sub));
 }
 

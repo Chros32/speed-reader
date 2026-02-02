@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowLeft, Trash2, Clock, Moon, Sun } from 'lucide-react';
+import { ArrowLeft, Trash2, Clock, Moon, Sun, Crown, Settings } from 'lucide-react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import RSVPDisplay from '@/components/RSVPDisplay';
@@ -51,7 +51,7 @@ function formatTimeAgo(timestamp: number): string {
 export default function ReaderPage() {
   const isNativeApp = useIsNativeApp();
   const { theme, toggleTheme } = useTheme();
-  const { maxWpm, canUploadFiles, canUseMusic, recordReading, checkCanRead, activatePremium, isPremium } = useSubscription();
+  const { maxWpm, canUploadFiles, canUseMusic, recordReading, checkCanRead, activatePremium, isPremium, customerId, openPortal } = useSubscription();
 
   // State
   const [text, setText] = useState<string | null>(null);
@@ -85,9 +85,27 @@ export default function ReaderPage() {
     if (typeof window === 'undefined') return;
 
     const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+
     if (params.get('success') === 'true' && !isPremium) {
-      // Activate premium (default 365 days, webhook will update if weekly)
-      activatePremium(365);
+      // Fetch customer ID from session
+      if (sessionId) {
+        fetch(`/api/checkout/session?session_id=${sessionId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.customerId) {
+              activatePremium(365, data.customerId);
+            } else {
+              activatePremium(365);
+            }
+          })
+          .catch(() => {
+            activatePremium(365);
+          });
+      } else {
+        activatePremium(365);
+      }
+
       setShowSuccessMessage(true);
       // Clear URL params
       window.history.replaceState({}, '', '/reader');
@@ -249,6 +267,36 @@ export default function ReaderPage() {
     </div>
   ) : null;
 
+  // Subscription status badge
+  const SubscriptionBadge = () => (
+    <div className="flex items-center gap-2">
+      {isPremium ? (
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1 px-2 py-1 bg-primary-500/10 text-primary-500 rounded-full text-xs font-medium">
+            <Crown size={12} />
+            Pro
+          </span>
+          {customerId && (
+            <button
+              onClick={openPortal}
+              className="p-1.5 rounded-lg hover:bg-[var(--card)] transition-colors"
+              title="Manage subscription"
+            >
+              <Settings size={16} className="text-[var(--muted)]" />
+            </button>
+          )}
+        </div>
+      ) : (
+        <button
+          onClick={() => handleUpgradeClick('general')}
+          className="px-2 py-1 bg-[var(--card)] hover:bg-[var(--border)] rounded-full text-xs font-medium transition-colors"
+        >
+          Upgrade to Pro
+        </button>
+      )}
+    </div>
+  );
+
   // Render input view if no text loaded
   if (!text) {
     return (
@@ -270,6 +318,9 @@ export default function ReaderPage() {
         )}
 
         <main className="flex-1 max-w-4xl mx-auto px-4 py-8 w-full">
+          <div className="flex justify-end mb-4">
+            <SubscriptionBadge />
+          </div>
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold mb-2">
               {isNativeApp ? 'What do you want to read?' : 'Start Reading'}

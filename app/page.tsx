@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Clock, BookOpen, Upload, Link as LinkIcon, Play, Pause, Timer } from 'lucide-react';
+import { Clock, BookOpen, Upload, Link as LinkIcon, Play, Pause, Timer, Check, X, ChevronDown, Music, Zap } from 'lucide-react';
 import Header from '@/components/Header';
 
 const DEMO_TEXT = "Speed reading is a technique that allows you to read faster while maintaining good comprehension. The RSVP method presents words one at a time at your chosen speed, eliminating eye movement and reducing subvocalization. With practice, you can dramatically increase your reading speed.";
@@ -33,6 +33,7 @@ export default function Home() {
   }, [router]);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const wpm = 250;
 
   const currentWord = DEMO_WORDS[currentWordIndex] || '';
@@ -206,6 +207,168 @@ export default function Home() {
                 No downloads. No sign-up. Just paste and read.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">
+            Simple Pricing
+          </h2>
+          <p className="text-center text-[var(--muted)] mb-12">
+            Start free, upgrade when you need more
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+            {/* Free Plan */}
+            <div className="bg-[var(--card)] rounded-2xl p-6 border border-[var(--border)]">
+              <h3 className="text-xl font-bold mb-2">Free</h3>
+              <div className="flex items-baseline gap-1 mb-4">
+                <span className="text-4xl font-bold">£0</span>
+                <span className="text-[var(--muted)]">forever</span>
+              </div>
+              <p className="text-sm text-[var(--muted)] mb-6">Perfect for casual readers</p>
+
+              <Link
+                href="/reader"
+                className="block w-full py-3 text-center bg-[var(--border)] hover:bg-[var(--muted)]/20 rounded-lg font-medium transition-colors mb-6"
+              >
+                Get Started
+              </Link>
+
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-sm">
+                  <Check size={16} className="text-green-500 flex-shrink-0" />
+                  <span>Up to 400 words per minute</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Check size={16} className="text-green-500 flex-shrink-0" />
+                  <span>3 documents per day</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Check size={16} className="text-green-500 flex-shrink-0" />
+                  <span>5,000 words per day</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Check size={16} className="text-green-500 flex-shrink-0" />
+                  <span>Paste text & URLs</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm text-[var(--muted)]">
+                  <X size={16} className="flex-shrink-0" />
+                  <span>File uploads (PDF, EPUB, TXT)</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm text-[var(--muted)]">
+                  <X size={16} className="flex-shrink-0" />
+                  <span>Focus music & binaural beats</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Pro Plan */}
+            <div className="bg-[var(--card)] rounded-2xl p-6 border-2 border-primary-500 relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary-500 text-white text-xs font-medium rounded-full">
+                Most Popular
+              </div>
+              <h3 className="text-xl font-bold mb-2">Pro</h3>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-4xl font-bold">£2.49</span>
+                <span className="text-[var(--muted)]">/week</span>
+              </div>
+              <p className="text-sm text-primary-500 mb-4">3-day free trial</p>
+              <p className="text-sm text-[var(--muted)] mb-6">Or £19.99/year (save 85%)</p>
+
+              <Link
+                href="/reader"
+                className="block w-full py-3 text-center bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors mb-6"
+              >
+                Start Free Trial
+              </Link>
+
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-sm">
+                  <Zap size={16} className="text-primary-500 flex-shrink-0" />
+                  <span><strong>Up to 1000 words per minute</strong></span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Check size={16} className="text-green-500 flex-shrink-0" />
+                  <span><strong>Unlimited</strong> documents</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Check size={16} className="text-green-500 flex-shrink-0" />
+                  <span><strong>Unlimited</strong> words</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Check size={16} className="text-green-500 flex-shrink-0" />
+                  <span>Paste text & URLs</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Upload size={16} className="text-primary-500 flex-shrink-0" />
+                  <span><strong>File uploads</strong> (PDF, EPUB, TXT)</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Music size={16} className="text-primary-500 flex-shrink-0" />
+                  <span><strong>Focus music</strong> & binaural beats</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-16 px-4 bg-[var(--card)]">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+            Frequently Asked Questions
+          </h2>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: "What is RSVP speed reading?",
+                a: "RSVP (Rapid Serial Visual Presentation) displays one word at a time in a fixed position, eliminating eye movement. This allows your brain to focus purely on comprehension rather than scanning text, enabling faster reading speeds."
+              },
+              {
+                q: "Will I still understand what I read?",
+                a: "Yes! Start at a comfortable speed (200-300 WPM) and gradually increase. Most people find their comprehension stays the same or improves because there are fewer distractions. The key is to find your optimal speed."
+              },
+              {
+                q: "How fast can I realistically read?",
+                a: "The average person reads at 200-250 WPM. With practice, most people can comfortably reach 400-500 WPM. Some experienced speed readers achieve 700+ WPM. We recommend starting slower and building up."
+              },
+              {
+                q: "What file types can I upload?",
+                a: "Pro users can upload PDF, EPUB, and TXT files. Free users can paste text directly or import from URLs. We extract the text content so you can speed read any document."
+              },
+              {
+                q: "Can I cancel my subscription anytime?",
+                a: "Absolutely. Cancel anytime with one click — no questions asked. If you're on the weekly plan with a free trial, you won't be charged if you cancel before the trial ends."
+              },
+              {
+                q: "What are the focus music options?",
+                a: "Pro users get access to lo-fi beats and ambient sounds designed to enhance concentration. Music plays in the background while you read, helping you enter a flow state."
+              }
+            ].map((faq, i) => (
+              <div key={i} className="border border-[var(--border)] rounded-xl overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-[var(--border)]/50 transition-colors"
+                >
+                  <span className="font-medium">{faq.q}</span>
+                  <ChevronDown
+                    size={20}
+                    className={`flex-shrink-0 transition-transform ${openFaq === i ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {openFaq === i && (
+                  <div className="px-6 pb-4 text-[var(--muted)]">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
