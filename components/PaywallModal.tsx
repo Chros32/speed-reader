@@ -23,7 +23,7 @@ const PLANS = [
     price: '$2.49',
     period: 'week',
     trial: '3-day free trial',
-    popular: true,
+    popular: false,
   },
   {
     id: 'annual',
@@ -31,12 +31,12 @@ const PLANS = [
     price: '$19.99',
     period: 'year',
     savings: 'Save 85%',
-    popular: false,
+    popular: true,
   },
 ];
 
 export default function PaywallModal({ isOpen, onClose, trigger = 'general' }: PaywallModalProps) {
-  const [selectedPlan, setSelectedPlan] = useState('weekly');
+  const [selectedPlan, setSelectedPlan] = useState('annual');
   const [isLoading, setIsLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -99,7 +99,7 @@ export default function PaywallModal({ isOpen, onClose, trigger = 'general' }: P
           </div>
           <h2 className="text-2xl font-bold mb-2">{triggerMessages[trigger]}</h2>
           <p className="text-[var(--muted)]">
-            Upgrade to Read Fast Premium for the ultimate speed reading experience
+            Upgrade to Read Fast Pro for the ultimate speed reading experience
           </p>
         </div>
 
@@ -174,11 +174,9 @@ export default function PaywallModal({ isOpen, onClose, trigger = 'general' }: P
 
         {/* Footer links */}
         <div className="px-6 pb-6 flex justify-center gap-4 text-xs text-[var(--muted)]">
-          <a href="#" className="hover:underline">Terms of Use</a>
+          <a href="/terms" className="hover:underline">Terms of Use</a>
           <span>·</span>
-          <a href="#" className="hover:underline">Privacy Policy</a>
-          <span>·</span>
-          <a href="#" className="hover:underline">Restore Purchase</a>
+          <a href="/privacy" className="hover:underline">Privacy Policy</a>
         </div>
       </div>
     </div>

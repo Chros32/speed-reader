@@ -249,11 +249,15 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-3 text-sm">
                   <Check size={16} className="text-green-500 flex-shrink-0" />
+                  <span>5,000 words/day</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Check size={16} className="text-green-500 flex-shrink-0" />
                   <span>Paste text & URLs</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm text-[var(--muted)]">
                   <X size={16} className="flex-shrink-0" />
-                  <span>File uploads</span>
+                  <span>PDF, EPUB & TXT uploads</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm text-[var(--muted)]">
                   <X size={16} className="flex-shrink-0" />
@@ -289,11 +293,11 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-3 text-sm">
                   <Upload size={16} className="text-primary-500 flex-shrink-0" />
-                  <span>File uploads</span>
+                  <span>PDF, EPUB & TXT uploads</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm">
                   <Music size={16} className="text-primary-500 flex-shrink-0" />
-                  <span>Focus music</span>
+                  <span>Focus music & binaural beats</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm text-[var(--muted)]">
                   <span className="text-xs">Cancel anytime</span>
@@ -331,11 +335,11 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-3 text-sm">
                   <Upload size={16} className="text-primary-500 flex-shrink-0" />
-                  <span>File uploads</span>
+                  <span>PDF, EPUB & TXT uploads</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm">
                   <Music size={16} className="text-primary-500 flex-shrink-0" />
-                  <span>Focus music</span>
+                  <span>Focus music & binaural beats</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm text-green-500">
                   <span className="text-xs font-medium">Best value — just $1.67/month</span>
