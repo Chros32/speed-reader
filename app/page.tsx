@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Clock, BookOpen, Upload, Link as LinkIcon, Play, Pause, Timer } from 'lucide-react';
 import Header from '@/components/Header';
 
@@ -19,6 +20,17 @@ function getORPIndex(word: string): number {
 }
 
 export default function Home() {
+  const router = useRouter();
+
+  // Redirect to reader if running in native app
+  useEffect(() => {
+    const isNativeApp = typeof window !== 'undefined' &&
+      (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
+
+    if (isNativeApp) {
+      router.replace('/reader');
+    }
+  }, [router]);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const wpm = 250;
@@ -78,13 +90,17 @@ export default function Home() {
               <BookOpen size={20} />
               Start Reading
             </Link>
-            <button
-              onClick={toggleDemo}
-              className="flex items-center gap-2 px-6 py-3 bg-[var(--card)] hover:bg-[var(--border)] rounded-lg font-medium transition-colors"
+            <a
+              href="#demo"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex items-center gap-2 px-6 py-3 bg-[var(--card)] hover:bg-[var(--border)] rounded-lg font-medium transition-colors cursor-pointer"
             >
-              {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-              {isPlaying ? 'Pause Demo' : 'Watch Demo'}
-            </button>
+              <Play size={20} />
+              Watch Demo
+            </a>
           </div>
         </div>
       </section>
@@ -108,7 +124,7 @@ export default function Home() {
       </section>
 
       {/* Demo Section */}
-      <section className="py-16 px-4">
+      <section id="demo" className="py-16 px-4 scroll-mt-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold mb-2">See How It Works</h2>
@@ -216,7 +232,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-[var(--border)]">
         <div className="max-w-4xl mx-auto text-center text-sm text-[var(--muted)]">
-          <p>Free RSVP Speed Reading Tool</p>
+          <p>Read Fast - Free RSVP Speed Reading</p>
         </div>
       </footer>
     </div>

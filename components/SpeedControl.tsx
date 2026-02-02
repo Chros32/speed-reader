@@ -1,31 +1,38 @@
 'use client';
 
-import { Minus, Plus } from 'lucide-react';
+import { Minus, Plus, Lock } from 'lucide-react';
 
 interface SpeedControlProps {
   wpm: number;
   onWpmChange: (wpm: number) => void;
+  maxWpm?: number;
+  onUpgradeClick?: () => void;
 }
 
 const PRESETS = [
   { value: 200, label: '200', sublabel: 'Beginner' },
   { value: 250, label: '250', sublabel: 'Average' },
   { value: 300, label: '300', sublabel: 'Fast' },
-  { value: 450, label: '450', sublabel: 'Advanced' },
-  { value: 600, label: '600', sublabel: 'Expert' },
+  { value: 450, label: '450', sublabel: 'Advanced', premium: true },
+  { value: 600, label: '600', sublabel: 'Expert', premium: true },
 ];
 
 const MIN_WPM = 100;
-const MAX_WPM = 1000;
-const STEP = 25;
+const DEFAULT_MAX_WPM = 1000;
+const STEP = 50;
 
-export default function SpeedControl({ wpm, onWpmChange }: SpeedControlProps) {
+export default function SpeedControl({ wpm, onWpmChange, maxWpm = DEFAULT_MAX_WPM, onUpgradeClick }: SpeedControlProps) {
+  const effectiveMax = maxWpm;
+  const isLimited = maxWpm < DEFAULT_MAX_WPM;
+
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onWpmChange(parseInt(e.target.value, 10));
+    const newValue = parseInt(e.target.value, 10);
+    onWpmChange(Math.min(newValue, effectiveMax));
   };
 
   const increment = () => {
-    onWpmChange(Math.min(MAX_WPM, wpm + STEP));
+    const newValue = Math.min(effectiveMax, wpm + STEP);
+    onWpmChange(newValue);
   };
 
   const decrement = () => {
@@ -56,7 +63,7 @@ export default function SpeedControl({ wpm, onWpmChange }: SpeedControlProps) {
         <input
           type="range"
           min={MIN_WPM}
-          max={MAX_WPM}
+          max={effectiveMax}
           step={STEP}
           value={wpm}
           onChange={handleSliderChange}
@@ -78,7 +85,7 @@ export default function SpeedControl({ wpm, onWpmChange }: SpeedControlProps) {
 
         <button
           onClick={increment}
-          disabled={wpm >= MAX_WPM}
+          disabled={wpm >= effectiveMax}
           className="p-2 rounded-lg bg-[var(--border)] hover:bg-[var(--muted)]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-label="Increase speed"
         >
@@ -88,21 +95,45 @@ export default function SpeedControl({ wpm, onWpmChange }: SpeedControlProps) {
 
       {/* Preset buttons */}
       <div className="flex gap-2 justify-center flex-wrap">
-        {PRESETS.map((preset) => (
-          <button
-            key={preset.value}
-            onClick={() => onWpmChange(preset.value)}
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              wpm === preset.value
-                ? 'bg-primary-500 text-white'
-                : 'bg-[var(--border)] hover:bg-[var(--muted)]/20'
-            }`}
-          >
-            <span className="font-medium">{preset.label}</span>
-            <span className="hidden sm:inline text-xs ml-1 opacity-70">{preset.sublabel}</span>
-          </button>
-        ))}
+        {PRESETS.map((preset) => {
+          const isLocked = preset.premium && preset.value > effectiveMax;
+
+          return (
+            <button
+              key={preset.value}
+              onClick={() => {
+                if (isLocked && onUpgradeClick) {
+                  onUpgradeClick();
+                } else if (!isLocked) {
+                  onWpmChange(preset.value);
+                }
+              }}
+              disabled={isLocked && !onUpgradeClick}
+              className={`px-3 py-1.5 rounded-lg text-sm transition-colors flex items-center gap-1 ${
+                wpm === preset.value
+                  ? 'bg-primary-500 text-white'
+                  : isLocked
+                  ? 'bg-[var(--border)] opacity-60 cursor-pointer'
+                  : 'bg-[var(--border)] hover:bg-[var(--muted)]/20'
+              }`}
+            >
+              {isLocked && <Lock size={12} />}
+              <span className="font-medium">{preset.label}</span>
+              <span className="hidden sm:inline text-xs ml-1 opacity-70">{preset.sublabel}</span>
+            </button>
+          );
+        })}
       </div>
+
+      {/* Upgrade prompt for limited users */}
+      {isLimited && (
+        <button
+          onClick={onUpgradeClick}
+          className="w-full text-center text-xs text-primary-500 hover:text-primary-600 transition-colors"
+        >
+          Upgrade to Premium for speeds up to 1000 WPM →
+        </button>
+      )}
     </div>
   );
 }

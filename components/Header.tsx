@@ -19,7 +19,7 @@ export default function Header({ showStartButton = true }: HeaderProps) {
           <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
             <Zap size={20} className="text-white" />
           </div>
-          <span className="font-bold text-xl">SpeedReader</span>
+          <span className="font-bold text-xl">Read Fast</span>
         </Link>
 
         {/* Right side */}

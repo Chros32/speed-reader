@@ -54,3 +54,26 @@ body {
 * {
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
+
+/* Safe area for iPhone notch and home indicator */
+.safe-area-inset {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Native app feel */
+html, body {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* Allow text selection in text areas and inputs */
+textarea, input {
+  -webkit-user-select: text;
+  user-select: text;
+}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowLeft, Trash2, Clock } from 'lucide-react';
+import { ArrowLeft, Trash2, Clock, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import RSVPDisplay from '@/components/RSVPDisplay';
@@ -9,9 +9,26 @@ import SpeedControl from '@/components/SpeedControl';
 import PlaybackControls from '@/components/PlaybackControls';
 import TextInput from '@/components/TextInput';
 import FontSizeControl from '@/components/FontSizeControl';
+import MusicPlayer from '@/components/MusicPlayer';
+import PaywallModal from '@/components/PaywallModal';
+import { useTheme } from '@/components/ThemeProvider';
+import { useSubscription } from '@/hooks/useSubscription';
 import { getRecentDocuments, saveDocument, updateDocumentProgress, deleteDocument, RecentDocument } from '@/lib/storage';
 
 type FontSize = 'small' | 'medium' | 'large' | 'xl';
+
+// Check if running in native app
+function useIsNativeApp() {
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    const check = typeof window !== 'undefined' &&
+      (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
+    setIsNative(!!check);
+  }, []);
+
+  return isNative;
+}
 
 function parseTextToWords(text: string): string[] {
   return text
@@ -32,6 +49,10 @@ function formatTimeAgo(timestamp: number): string {
 }
 
 export default function ReaderPage() {
+  const isNativeApp = useIsNativeApp();
+  const { theme, toggleTheme } = useTheme();
+  const { maxWpm, canUploadFiles, canUseMusic, recordReading, checkCanRead, activatePremium, isPremium } = useSubscription();
+
   // State
   const [text, setText] = useState<string | null>(null);
   const [words, setWords] = useState<string[]>([]);
@@ -43,6 +64,10 @@ export default function ReaderPage() {
   const [recentDocs, setRecentDocs] = useState<RecentDocument[]>([]);
   const [currentDocId, setCurrentDocId] = useState<string | null>(null);
 
+  // Paywall state
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallTrigger, setPaywallTrigger] = useState<'speed' | 'upload' | 'music' | 'limit' | 'general'>('general');
+
   // Refs
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -53,6 +78,23 @@ export default function ReaderPage() {
   useEffect(() => {
     setRecentDocs(getRecentDocuments());
   }, []);
+
+  // Handle successful payment redirect
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === 'true' && !isPremium) {
+      // Activate premium (default 365 days, webhook will update if weekly)
+      activatePremium(365);
+      setShowSuccessMessage(true);
+      // Clear URL params
+      window.history.replaceState({}, '', '/reader');
+      // Hide success message after 5 seconds
+      setTimeout(() => setShowSuccessMessage(false), 5000);
+    }
+  }, [activatePremium, isPremium]);
 
   // Parse text into words when text changes
   useEffect(() => {
@@ -127,7 +169,7 @@ export default function ReaderPage() {
           break;
         case 'ArrowUp':
           e.preventDefault();
-          setWpm((prev) => Math.min(1000, prev + 25));
+          setWpm((prev) => Math.min(maxWpm, prev + 25));
           break;
         case 'ArrowDown':
           e.preventDefault();
@@ -143,12 +185,28 @@ export default function ReaderPage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [words.length]);
+  }, [words.length, maxWpm]);
 
   // Handlers
-  const handleTextSubmit = useCallback((newText: string) => {
-    setText(newText);
+  const handleUpgradeClick = useCallback((trigger: 'speed' | 'upload' | 'music' | 'limit' | 'general' = 'general') => {
+    setPaywallTrigger(trigger);
+    setShowPaywall(true);
   }, []);
+
+  const handleTextSubmit = useCallback((newText: string) => {
+    const wordCount = parseTextToWords(newText).length;
+    const canRead = checkCanRead();
+
+    if (!canRead.allowed) {
+      setPaywallTrigger('limit');
+      setShowPaywall(true);
+      return;
+    }
+
+    // Record the reading usage
+    recordReading(wordCount);
+    setText(newText);
+  }, [checkCanRead, recordReading]);
 
   const handlePlayPause = useCallback(() => {
     if (currentIndex >= words.length - 1) {
@@ -184,21 +242,49 @@ export default function ReaderPage() {
     setRecentDocs(getRecentDocuments());
   }, []);
 
+  // Success message component
+  const SuccessBanner = () => showSuccessMessage ? (
+    <div className="bg-green-500 text-white text-center py-3 px-4">
+      <span className="font-semibold">Welcome to Premium!</span> You now have unlimited access to all features.
+    </div>
+  ) : null;
+
   // Render input view if no text loaded
   if (!text) {
     return (
-      <div className="min-h-screen">
-        <Header showStartButton={false} />
+      <div className="min-h-screen flex flex-col">
+        {!isNativeApp && <Header showStartButton={false} />}
+        <SuccessBanner />
 
-        <main className="max-w-4xl mx-auto px-4 py-12">
+        {/* Native app header */}
+        {isNativeApp && (
+          <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--border)]">
+            <h1 className="text-xl font-bold">Read Fast</h1>
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-[var(--card)]"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+          </div>
+        )}
+
+        <main className="flex-1 max-w-4xl mx-auto px-4 py-8 w-full">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Start Reading</h1>
+            <h1 className="text-2xl font-bold mb-2">
+              {isNativeApp ? 'What do you want to read?' : 'Start Reading'}
+            </h1>
             <p className="text-[var(--muted)]">
-              Paste text, enter a URL, or upload a file to begin
+              {isNativeApp ? 'Paste text or upload a file' : 'Paste text, enter a URL, or upload a file to begin'}
             </p>
           </div>
 
-          <TextInput onTextSubmit={handleTextSubmit} isLoading={isLoading} />
+          <TextInput
+            onTextSubmit={handleTextSubmit}
+            isLoading={isLoading}
+            canUploadFiles={canUploadFiles}
+            onUpgradeClick={() => handleUpgradeClick('upload')}
+          />
 
           {/* Recent Documents */}
           {recentDocs.length > 0 && (
@@ -211,12 +297,10 @@ export default function ReaderPage() {
                 {recentDocs.map((doc) => (
                   <div
                     key={doc.id}
-                    className="bg-[var(--card)] rounded-lg p-4 flex items-center justify-between group hover:bg-[var(--border)]/50 transition-colors"
+                    className="bg-[var(--card)] rounded-lg p-4 flex items-center justify-between group"
                   >
                     <button
                       onClick={() => {
-                        // Find the text from preview (simplified - in production you'd store full text)
-                        // For now, we'll just show a message
                         alert('To re-read this document, please paste the text again. Full document storage coming in V2!');
                       }}
                       className="flex-1 text-left"
@@ -225,14 +309,14 @@ export default function ReaderPage() {
                       <div className="text-sm text-[var(--muted)] flex items-center gap-3 mt-1">
                         <span>{doc.wordCount} words</span>
                         <span>•</span>
-                        <span>{doc.progress}% complete</span>
+                        <span>{doc.progress}%</span>
                         <span>•</span>
                         <span>{formatTimeAgo(doc.lastRead)}</span>
                       </div>
                     </button>
                     <button
                       onClick={() => handleDeleteDoc(doc.id)}
-                      className="p-2 text-[var(--muted)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-2 text-[var(--muted)] hover:text-red-500"
                       title="Delete"
                     >
                       <Trash2 size={18} />
@@ -243,16 +327,25 @@ export default function ReaderPage() {
             </div>
           )}
 
-          <div className="mt-8 text-center">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-            >
-              <ArrowLeft size={18} />
-              Back to Home
-            </Link>
-          </div>
+          {!isNativeApp && (
+            <div className="mt-8 text-center">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+              >
+                <ArrowLeft size={18} />
+                Back to Home
+              </Link>
+            </div>
+          )}
         </main>
+
+        {/* Paywall Modal */}
+        <PaywallModal
+          isOpen={showPaywall}
+          onClose={() => setShowPaywall(false)}
+          trigger={paywallTrigger}
+        />
       </div>
     );
   }
@@ -260,7 +353,8 @@ export default function ReaderPage() {
   // Render reader view
   return (
     <div className="min-h-screen flex flex-col">
-      <Header showStartButton={false} />
+      {!isNativeApp && <Header showStartButton={false} />}
+      <SuccessBanner />
 
       {/* Reader info bar */}
       <div className="border-b border-[var(--border)] py-3 px-4">
@@ -270,20 +364,41 @@ export default function ReaderPage() {
             className="flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
           >
             <ArrowLeft size={18} />
-            New Text
+            {isNativeApp ? 'Back' : 'New Text'}
           </button>
           <div className="flex items-center gap-4">
             <FontSizeControl fontSize={fontSize} onFontSizeChange={setFontSize} />
-            <div className="text-sm text-[var(--muted)]">
-              {words.length} words • ~{Math.ceil(words.length / wpm)} min
-            </div>
+            <MusicPlayer
+              isEnabled={canUseMusic}
+              onUpgradeClick={() => handleUpgradeClick('music')}
+            />
+            {!isNativeApp && (
+              <div className="text-sm text-[var(--muted)]">
+                {words.length} words • ~{Math.ceil(words.length / wpm)} min
+              </div>
+            )}
+            {isNativeApp && (
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg bg-[var(--card)]"
+              >
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+            )}
           </div>
         </div>
       </div>
 
+      {/* Word count for native app */}
+      {isNativeApp && (
+        <div className="text-center text-sm text-[var(--muted)] py-2">
+          {words.length} words • ~{Math.ceil(words.length / wpm)} min
+        </div>
+      )}
+
       {/* Main reader area */}
-      <main className="flex-1 flex flex-col justify-center py-8 px-4">
-        <div className="space-y-8">
+      <main className="flex-1 flex flex-col justify-center py-4 px-4">
+        <div className="space-y-6">
           {/* RSVP Display */}
           <RSVPDisplay word={currentWord} wpm={wpm} fontSize={fontSize} />
 
@@ -301,9 +416,21 @@ export default function ReaderPage() {
           />
 
           {/* Speed Control */}
-          <SpeedControl wpm={wpm} onWpmChange={setWpm} />
+          <SpeedControl
+            wpm={wpm}
+            onWpmChange={setWpm}
+            maxWpm={maxWpm}
+            onUpgradeClick={() => handleUpgradeClick('speed')}
+          />
         </div>
       </main>
+
+      {/* Paywall Modal */}
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        trigger={paywallTrigger}
+      />
     </div>
   );
 }
