@@ -20,7 +20,7 @@ const PLANS = [
   {
     id: 'weekly',
     name: 'Weekly',
-    price: '£2.49',
+    price: '$2.49',
     period: 'week',
     trial: '3-day free trial',
     popular: true,
@@ -28,7 +28,7 @@ const PLANS = [
   {
     id: 'annual',
     name: 'Annual',
-    price: '£19.99',
+    price: '$19.99',
     period: 'year',
     savings: 'Save 85%',
     popular: false,
@@ -168,7 +168,7 @@ export default function PaywallModal({ isOpen, onClose, trigger = 'general' }: P
             {isLoading ? 'Processing...' : selectedPlan === 'weekly' ? 'Start Free Trial' : 'Subscribe Now'}
           </button>
           <p className="text-xs text-center text-[var(--muted)] mt-3">
-            Cancel anytime. {selectedPlan === 'weekly' ? 'Free for 3 days, then £2.49/week.' : '£19.99 billed annually.'}
+            Cancel anytime. {selectedPlan === 'weekly' ? 'Free for 3 days, then $2.49/week.' : '$19.99 billed annually.'}
           </p>
         </div>
 

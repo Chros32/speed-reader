@@ -213,7 +213,7 @@ export default function Home() {
 
       {/* Pricing Section */}
       <section id="pricing" className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">
             Simple Pricing
           </h2>
@@ -221,15 +221,15 @@ export default function Home() {
             Start free, upgrade when you need more
           </p>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6">
             {/* Free Plan */}
             <div className="bg-[var(--card)] rounded-2xl p-6 border border-[var(--border)]">
               <h3 className="text-xl font-bold mb-2">Free</h3>
               <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-4xl font-bold">£0</span>
+                <span className="text-4xl font-bold">$0</span>
                 <span className="text-[var(--muted)]">forever</span>
               </div>
-              <p className="text-sm text-[var(--muted)] mb-6">Perfect for casual readers</p>
+              <p className="text-sm text-[var(--muted)] mb-6">Perfect for trying it out</p>
 
               <Link
                 href="/reader"
@@ -241,15 +241,11 @@ export default function Home() {
               <ul className="space-y-3">
                 <li className="flex items-center gap-3 text-sm">
                   <Check size={16} className="text-green-500 flex-shrink-0" />
-                  <span>Up to 400 words per minute</span>
+                  <span>Up to 400 WPM</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm">
                   <Check size={16} className="text-green-500 flex-shrink-0" />
-                  <span>3 documents per day</span>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <Check size={16} className="text-green-500 flex-shrink-0" />
-                  <span>5,000 words per day</span>
+                  <span>3 documents/day</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm">
                   <Check size={16} className="text-green-500 flex-shrink-0" />
@@ -257,31 +253,27 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-3 text-sm text-[var(--muted)]">
                   <X size={16} className="flex-shrink-0" />
-                  <span>File uploads (PDF, EPUB, TXT)</span>
+                  <span>File uploads</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm text-[var(--muted)]">
                   <X size={16} className="flex-shrink-0" />
-                  <span>Focus music & binaural beats</span>
+                  <span>Focus music</span>
                 </li>
               </ul>
             </div>
 
-            {/* Pro Plan */}
-            <div className="bg-[var(--card)] rounded-2xl p-6 border-2 border-primary-500 relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary-500 text-white text-xs font-medium rounded-full">
-                Most Popular
-              </div>
-              <h3 className="text-xl font-bold mb-2">Pro</h3>
+            {/* Weekly Plan */}
+            <div className="bg-[var(--card)] rounded-2xl p-6 border border-[var(--border)]">
+              <h3 className="text-xl font-bold mb-2">Pro Weekly</h3>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-4xl font-bold">£2.49</span>
+                <span className="text-4xl font-bold">$2.49</span>
                 <span className="text-[var(--muted)]">/week</span>
               </div>
-              <p className="text-sm text-primary-500 mb-4">3-day free trial</p>
-              <p className="text-sm text-[var(--muted)] mb-6">Or £19.99/year (save 85%)</p>
+              <p className="text-sm text-primary-500 mb-6">3-day free trial</p>
 
               <Link
                 href="/reader"
-                className="block w-full py-3 text-center bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors mb-6"
+                className="block w-full py-3 text-center bg-[var(--card)] border border-primary-500 text-primary-500 hover:bg-primary-500/10 rounded-lg font-medium transition-colors mb-6"
               >
                 Start Free Trial
               </Link>
@@ -289,27 +281,64 @@ export default function Home() {
               <ul className="space-y-3">
                 <li className="flex items-center gap-3 text-sm">
                   <Zap size={16} className="text-primary-500 flex-shrink-0" />
-                  <span><strong>Up to 1000 words per minute</strong></span>
+                  <span><strong>Up to 1000 WPM</strong></span>
                 </li>
                 <li className="flex items-center gap-3 text-sm">
                   <Check size={16} className="text-green-500 flex-shrink-0" />
-                  <span><strong>Unlimited</strong> documents</span>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <Check size={16} className="text-green-500 flex-shrink-0" />
-                  <span><strong>Unlimited</strong> words</span>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <Check size={16} className="text-green-500 flex-shrink-0" />
-                  <span>Paste text & URLs</span>
+                  <span><strong>Unlimited</strong> reading</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm">
                   <Upload size={16} className="text-primary-500 flex-shrink-0" />
-                  <span><strong>File uploads</strong> (PDF, EPUB, TXT)</span>
+                  <span>File uploads</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm">
                   <Music size={16} className="text-primary-500 flex-shrink-0" />
-                  <span><strong>Focus music</strong> & binaural beats</span>
+                  <span>Focus music</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm text-[var(--muted)]">
+                  <span className="text-xs">Cancel anytime</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Annual Plan - Most Popular */}
+            <div className="bg-[var(--card)] rounded-2xl p-6 border-2 border-primary-500 relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary-500 text-white text-xs font-medium rounded-full">
+                Most Popular
+              </div>
+              <h3 className="text-xl font-bold mb-2">Pro Annual</h3>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-4xl font-bold">$19.99</span>
+                <span className="text-[var(--muted)]">/year</span>
+              </div>
+              <p className="text-sm text-green-500 font-medium mb-6">Save 85%</p>
+
+              <Link
+                href="/reader"
+                className="block w-full py-3 text-center bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors mb-6"
+              >
+                Get Pro Annual
+              </Link>
+
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-sm">
+                  <Zap size={16} className="text-primary-500 flex-shrink-0" />
+                  <span><strong>Up to 1000 WPM</strong></span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Check size={16} className="text-green-500 flex-shrink-0" />
+                  <span><strong>Unlimited</strong> reading</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Upload size={16} className="text-primary-500 flex-shrink-0" />
+                  <span>File uploads</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <Music size={16} className="text-primary-500 flex-shrink-0" />
+                  <span>Focus music</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm text-green-500">
+                  <span className="text-xs font-medium">Best value — just $1.67/month</span>
                 </li>
               </ul>
             </div>
