@@ -53,7 +53,7 @@ export default function PaywallModal({ isOpen, onClose, trigger = 'general' }: P
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/checkout/', {
+      const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planId: selectedPlan }),
