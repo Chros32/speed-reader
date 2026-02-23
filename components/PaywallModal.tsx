@@ -196,11 +196,9 @@ export default function PaywallModal({ isOpen, onClose, trigger = 'general' }: P
 
         {/* Footer links */}
         <div className="px-6 pb-6 flex justify-center gap-4 text-xs text-[var(--muted)]">
-          <a href="#" className="hover:underline">Terms of Use</a>
+          <a href="/terms" className="hover:underline">Terms of Use</a>
           <span>·</span>
-          <a href="#" className="hover:underline">Privacy Policy</a>
-          <span>·</span>
-          <a href="#" className="hover:underline">Restore Purchase</a>
+          <a href="/privacy" className="hover:underline">Privacy Policy</a>
         </div>
       </div>
     </div>

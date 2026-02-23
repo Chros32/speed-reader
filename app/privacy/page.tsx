@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         <h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
 
         <div className="prose prose-neutral dark:prose-invert max-w-none space-y-6 text-[var(--foreground)]">
-          <p className="text-[var(--muted)]">Last updated: February 2025</p>
+          <p className="text-[var(--muted)]">Last updated: February 2026</p>
 
           <section>
             <h2 className="text-xl font-semibold mt-8 mb-4">1. Introduction</h2>
@@ -76,6 +76,7 @@ export default function PrivacyPage() {
             <ul className="list-disc pl-6 mt-2 space-y-1 text-[var(--muted)]">
               <li><strong>Stripe</strong> — for secure payment processing</li>
               <li><strong>Vercel</strong> — for hosting the application</li>
+              <li><strong>Vercel Analytics</strong> — for anonymous, privacy-friendly usage analytics (no cookies, no personal data)</li>
             </ul>
             <p className="text-[var(--muted)] mt-2">
               These services have their own privacy policies governing their use of your data.
@@ -86,7 +87,8 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold mt-8 mb-4">6. Cookies</h2>
             <p className="text-[var(--muted)]">
               Read Fast uses localStorage to store your preferences and subscription status.
-              We do not use tracking cookies or third-party analytics cookies.
+              We do not use tracking cookies. Vercel Analytics collects anonymous page view
+              data without using cookies or collecting personal information.
             </p>
           </section>
 

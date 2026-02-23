@@ -1,11 +1,6 @@
 import Stripe from 'stripe';
 import { NextResponse } from 'next/server';
 
-// TODO: Replace these placeholder IDs with real Stripe Price IDs
-// Create 3 products in Stripe Dashboard:
-//   1. Pro Weekly — $1.99/week recurring (with 3-day free trial)
-//   2. Pro Annual — $19/year recurring
-//   3. Pro Lifetime — $49 one-time payment
 const PRICE_IDS: Record<string, string> = {
   weekly: 'price_1T45NsJtxoCx68Pgfz0kVxgf',
   annual: 'price_1T45ObJtxoCx68Pg9oKxy7WR',

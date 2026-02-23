@@ -16,7 +16,7 @@ export default function TermsPage() {
         <h1 className="text-3xl font-bold mb-8">Terms of Use</h1>
 
         <div className="prose prose-neutral dark:prose-invert max-w-none space-y-6 text-[var(--foreground)]">
-          <p className="text-[var(--muted)]">Last updated: February 2025</p>
+          <p className="text-[var(--muted)]">Last updated: February 2026</p>
 
           <section>
             <h2 className="text-xl font-semibold mt-8 mb-4">1. Acceptance of Terms</h2>
@@ -46,13 +46,14 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mt-8 mb-4">4. Subscriptions and Payments</h2>
             <p className="text-[var(--muted)]">
-              Read Fast Pro is available as a weekly ($2.49/week) or annual ($19.99/year) subscription.
-              The weekly plan includes a 3-day free trial. Subscriptions automatically renew unless
-              cancelled before the end of the current billing period.
+              Read Fast Pro is available as a weekly ($1.99/week), annual ($19/year), or lifetime ($49 one-time)
+              plan. The weekly plan includes a 3-day free trial. Weekly and annual subscriptions automatically
+              renew unless cancelled before the end of the current billing period. The lifetime plan is a
+              one-time payment that grants permanent access to all Pro features.
             </p>
             <p className="text-[var(--muted)] mt-2">
               You may cancel your subscription at any time through the Stripe customer portal.
-              Refunds are handled on a case-by-case basis.
+              All paid plans include a 30-day money-back guarantee.
             </p>
           </section>
 
