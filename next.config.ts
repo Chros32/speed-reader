@@ -6,8 +6,8 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     resolveAlias: {
-      canvas: { browser: '' },
-      encoding: { browser: '' },
+      canvas: '',
+      encoding: '',
     },
   },
   webpack: (config) => {

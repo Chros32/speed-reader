@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
@@ -28,6 +29,7 @@ export default function RootLayout({
       <body className="safe-area-inset">
         <ThemeProvider>
           {children}
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
