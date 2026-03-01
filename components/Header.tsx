@@ -22,6 +22,16 @@ export default function Header({ showStartButton = true }: HeaderProps) {
           <span className="font-bold text-xl">Read Fast</span>
         </Link>
 
+        {/* Nav links */}
+        <nav className="flex items-center gap-1">
+          <Link
+            href="/blog"
+            className="px-3 py-2 rounded-lg text-sm font-medium text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--card)] transition-colors"
+          >
+            Blog
+          </Link>
+        </nav>
+
         {/* Right side */}
         <div className="flex items-center gap-3">
           {/* Theme toggle */}
